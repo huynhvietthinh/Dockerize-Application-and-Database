@@ -38,6 +38,9 @@ services:
       # Lưu trữ dữ liệu database ra bên ngoài container
       # để không bị mất dữ liệu mỗi khi restart
       - postgres_data:/var/lib/postgresql/data
+      # Dòng MỚI: Gắn file init.sql vào
+      # Postgres sẽ tự động chạy bất kỳ file .sql nào trong thư mục này
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       # Kiểm tra sức khỏe của chính Postgres
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
