@@ -92,4 +92,4 @@ jobs:
 
       # Bước 6: Chạy test! (Đây chính là yêu cầu của bài lab)
       - name: Run Postman tests (Newman)
-        run: newman run postman/MockTest API.postman_collection.json
+        run: newman run postman/MockTestAPI.postman_collection.json
