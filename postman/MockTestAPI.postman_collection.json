@@ -8,10 +8,21 @@
 	},
 	"item": [
 		{
-			"name": "http://localhost:3000/health",
+			"name": "Health Check",
 			"request": {
 				"method": "GET",
-				"header": []
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/health",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"health"
+					]
+				}
 			},
 			"response": []
 		}
