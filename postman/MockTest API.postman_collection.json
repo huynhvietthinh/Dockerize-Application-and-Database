@@ -1,0 +1,18 @@
+{
+	"info": {
+		"_postman_id": "30756515-5577-46a0-bf43-04c62a64ccd9",
+		"name": "MockTest API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42802683"
+	},
+	"item": [
+		{
+			"name": "http://localhost:3000/health",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}

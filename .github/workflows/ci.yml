@@ -51,3 +51,45 @@ jobs:
           # Đường dẫn đến thư mục/file bạn muốn upload
           # (Jest đã tạo ra thư mục 'coverage' cho chúng ta)
           path: ./coverage/
+  # ... (job 'build-and-test' của bạn kết thúc ở trên)
+
+  # JOB MỚI: Chạy Integration Test
+  integration-test:
+    # Yêu cầu: Chạy SAU KHI job 'build-and-test' thành công
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      # Bước 1: Lấy code về (lần này có cả thư mục postman/)
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Bước 2: Tạo file .env từ GitHub Secrets (bí mật bạn vừa tạo ở Bước 3.1)
+      - name: Create .env file
+        run: |
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+
+      # Bước 3: Khởi động app và database bằng Docker Compose
+      - name: Start services (app + db)
+        run: docker compose up -d
+
+      # Bước 4: Đợi cho đến khi app sẵn sàng (RẤT QUAN TRỌNG)
+      - name: Wait for services
+        run: |
+          echo "Waiting for health endpoint..."
+          # Lệnh này sẽ kiểm tra /health liên tục, 5 giây 1 lần, cho đến khi thành công
+          until $(curl --output /dev/null --silent --head --fail http://localhost:3000/health); do
+            printf '.'
+            sleep 5
+          done
+          echo "Service is up and running!"
+
+      # Bước 5: Cài đặt Newman (công cụ chạy test Postman)
+      - name: Install Newman
+        run: npm install -g newman
+
+      # Bước 6: Chạy test! (Đây chính là yêu cầu của bài lab)
+      - name: Run Postman tests (Newman)
+        run: newman run postman/MockTest.postman_collection.json
