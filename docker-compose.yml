@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Dịch vụ 1: Ứng dụng MockTest
+  app:
+    # Build image từ Dockerfile trong thư mục hiện tại
+    build: .
+    ports:
+      # Ánh xạ cổng: <cổng máy thật>:<cổng bên trong container>
+      - "3000:3000"
+    environment:
+      # Truyền biến môi trường vào app (xem file index.js)
+      - DB_HOST=db  # 'db' là tên của dịch vụ database bên dưới
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    depends_on:
+      # Khởi động app CHỈ SAU KHI dịch vụ 'db' đã khởi động
+      db:
+        condition: service_healthy # Chờ cho đến khi db 'healthy'
+    healthcheck:
+      # Docker tự kiểm tra /health của app
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Dịch vụ 2: Database Postgres
+  db:
+    # Sử dụng image chính thức của Postgres
+    image: postgres:15-alpine
+    environment:
+      # Tạo database và user/pass khi container khởi tạo
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      # Lưu trữ dữ liệu database ra bên ngoài container
+      # để không bị mất dữ liệu mỗi khi restart
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      # Kiểm tra sức khỏe của chính Postgres
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# Định nghĩa "volume" đã khai báo ở trên
+volumes:
+  postgres_data:
